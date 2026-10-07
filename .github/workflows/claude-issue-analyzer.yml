@@ -75,7 +75,10 @@ jobs:
             gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file /tmp/diagnostico.md
             ```
 
-            El archivo de diagnóstico debe tener esta estructura en español:
+            El archivo de diagnóstico debe estar escrito en Markdown compatible con GitHub
+            (GFM: GitHub Flavored Markdown). Usa encabezados `##`/`###`, listas con `-`,
+            negritas con `**`, bloques de código con triple backtick e idioma (ej. ```js),
+            y tablas si ayudan a la claridad. Evita HTML crudo. Estructura sugerida en español:
 
             ```markdown
             ## 🔍 Diagnóstico técnico
