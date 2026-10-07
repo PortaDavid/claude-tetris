@@ -15,6 +15,29 @@ body {
   user-select: none;
 }
 
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ---- Título (colores de las piezas) ---- */
+.title {
+  display: flex;
+  gap: 6px;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.title span:nth-child(1) { color: #e57373; } /* Z */
+.title span:nth-child(2) { color: #ffb74d; } /* L */
+.title span:nth-child(3) { color: #ffd54f; } /* O */
+.title span:nth-child(4) { color: #81c784; } /* S */
+.title span:nth-child(5) { color: #4dd0e1; } /* I */
+.title span:nth-child(6) { color: #ba68c8; } /* T */
+
 .wrapper {
   position: relative;
 }
