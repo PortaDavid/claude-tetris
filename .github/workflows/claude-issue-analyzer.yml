@@ -1,0 +1,98 @@
+name: Análisis de Issues con Claude
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  analizar-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Analizar Issue con Claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          REPO: ${{ github.repository }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowedTools "Bash(gh *)"'
+          prompt: |
+            Eres un asistente técnico analizando issues del proyecto Tetris en JavaScript vanilla.
+            Responde siempre en español.
+
+            Los datos del issue están en las variables de entorno: $ISSUE_NUMBER, $ISSUE_TITLE, $ISSUE_BODY, $REPO.
+
+            ## Contexto técnico del proyecto
+
+            Tetris clásico en HTML5 Canvas sin dependencias ni build step. Tres archivos raíz:
+            - index.html: DOM con canvas 300×600 (tablero) y 120×120 (siguiente pieza)
+            - style.css: tema retro oscuro en CSS plano
+            - game.js (~300 líneas): toda la lógica del juego
+              - Board model: matriz ROWS×COLS, 0=vacío, 1-7=índice de color de pieza
+              - Piezas: PIECES[], matrices 2D indexadas 1-7
+              - Rotación: rotateCW (transponer+invertir filas), wall kicks en tryRotate con offsets [0,-1,1,-2,2]
+              - Game loop: requestAnimationFrame, baja pieza cuando dropAccum >= dropInterval
+              - Scoring: LINE_SCORES=[0,100,300,500,800]×nivel; hard drop +2pts/celda; soft drop +1pt/fila
+              - Velocidad: dropInterval=max(100,1000-(nivel-1)*90) ms; nivel sube cada 10 líneas
+              - Ghost piece: ghostY() proyecta posición de aterrizaje, dibujada con globalAlpha=0.2
+              - Estado global: init() resetea board, current, next, score, lines, level, etc.
+
+            ## Pasos a ejecutar (en orden)
+
+            **Paso 1 — Listar labels disponibles:**
+            ```
+            gh label list --repo "$REPO" --json name --jq '.[].name'
+            ```
+
+            **Paso 2 — Analizar el issue** ($ISSUE_TITLE / $ISSUE_BODY) y determinar:
+            - Tipo: bug / mejora / nueva funcionalidad / documentación / pregunta
+            - Severidad: crítica / alta / media / baja
+            - Componentes de game.js afectados (board model, game loop, piezas/rotación, scoring, rendering/canvas, ghost piece, controles, init)
+            - Labels apropiados de los que existen en el repositorio (del paso 1)
+
+            **Paso 3 — Asignar labels:**
+            ```
+            gh issue edit "$ISSUE_NUMBER" --add-label "label1,label2" --repo "$REPO"
+            ```
+            Usa solo labels que existan en el repositorio. Si ninguno aplica, omite este paso.
+
+            **Paso 4 — Publicar diagnóstico como comentario:**
+            Escribe el diagnóstico en /tmp/diagnostico.md y luego ejecuta:
+            ```
+            gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file /tmp/diagnostico.md
+            ```
+
+            El archivo de diagnóstico debe tener esta estructura en español:
+
+            ```markdown
+            ## 🔍 Diagnóstico técnico
+
+            **Tipo**: [bug / mejora / nueva funcionalidad / documentación / pregunta]
+            **Severidad**: [crítica / alta / media / baja]
+
+            ### Análisis del problema
+            [Descripción técnica detallada de qué está fallando o qué se solicita, con referencias a funciones o variables específicas de game.js cuando aplique]
+
+            ### Componentes afectados
+            - [componente 1]: [por qué está involucrado]
+            - [componente 2]: [por qué está involucrado]
+
+            ### Sugerencias de implementación
+            [Cómo abordar la solución: qué funciones modificar, qué lógica agregar, qué considerar para no romper otros componentes]
+
+            ---
+            *Análisis generado automáticamente por Claude*
+            ```
