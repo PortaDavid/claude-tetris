@@ -190,6 +190,7 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
     context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
     if (currentSkin === 'neon') {
       context.shadowBlur = 0;
+      context.shadowColor = 'transparent';
     }
     context.fillStyle = 'rgba(255,255,255,0.12)';
     context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
@@ -369,7 +370,7 @@ function applySkin(name) {
   document.querySelectorAll('.skin-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.skin === name);
   });
-  if (typeof draw === 'function' && typeof current !== 'undefined' && current) {
+  if (typeof draw === 'function' && typeof current !== 'undefined' && current && !gameOver) {
     draw();
     drawNext();
   }
