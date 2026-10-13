@@ -16,6 +16,15 @@ const COLORS = [
   '#b0bec5', // Tuerca - gris metálico
 ];
 
+const SKIN_COLORS = {
+  retro:  [null, '#4dd0e1','#ffd54f','#ba68c8','#81c784','#e57373','#90caf9','#ffb74d','#b0bec5'],
+  neon:   [null, '#00ffff','#ffff00','#ff00ff','#00ff41','#ff073a','#00b4ff','#ff6600','#c0c0c0'],
+  pastel: [null, '#a8dadc','#ffd6a5','#d8b4fe','#b7e4c7','#ffb3b3','#bde0fe','#ffc8a2','#d4d4d4'],
+  pixel:  [null, '#4dd0e1','#ffd54f','#ba68c8','#81c784','#e57373','#90caf9','#ffb74d','#b0bec5'],
+};
+
+let currentSkin = 'retro';
+
 const PIECES = [
   null,
   [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], // I
@@ -163,11 +172,43 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
   const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  if (currentSkin === 'pastel') {
+    context.fillStyle = color;
+    context.beginPath();
+    if (context.roundRect) {
+      context.roundRect(x * size + 2, y * size + 2, size - 4, size - 4, 6);
+    } else {
+      context.rect(x * size + 2, y * size + 2, size - 4, size - 4);
+    }
+    context.fill();
+  } else {
+    if (currentSkin === 'neon') {
+      context.shadowBlur = 14;
+      context.shadowColor = color;
+    }
+    context.fillStyle = color;
+    context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+    if (currentSkin === 'neon') {
+      context.shadowBlur = 0;
+    }
+    context.fillStyle = 'rgba(255,255,255,0.12)';
+    context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+    if (currentSkin === 'pixel') {
+      const cellSize = (size - 2) / 4;
+      context.strokeStyle = 'rgba(0,0,0,0.2)';
+      context.lineWidth = 0.5;
+      for (let i = 1; i < 4; i++) {
+        context.beginPath();
+        context.moveTo(x * size + 1 + i * cellSize, y * size + 1);
+        context.lineTo(x * size + 1 + i * cellSize, y * size + size - 1);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(x * size + 1, y * size + 1 + i * cellSize);
+        context.lineTo(x * size + size - 1, y * size + 1 + i * cellSize);
+        context.stroke();
+      }
+    }
+  }
   context.globalAlpha = 1;
 }
 
@@ -319,5 +360,25 @@ themeBtn.addEventListener('click', () => {
 });
 
 applyTheme(document.documentElement.dataset.theme);
+
+function applySkin(name) {
+  currentSkin = name;
+  const palette = SKIN_COLORS[name] || SKIN_COLORS.retro;
+  for (let i = 0; i < palette.length; i++) COLORS[i] = palette[i];
+  localStorage.setItem('skin', name);
+  document.querySelectorAll('.skin-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.skin === name);
+  });
+  if (typeof draw === 'function' && typeof current !== 'undefined' && current) {
+    draw();
+    drawNext();
+  }
+}
+
+document.querySelectorAll('.skin-btn').forEach(btn => {
+  btn.addEventListener('click', () => { applySkin(btn.dataset.skin); btn.blur(); });
+});
+
+applySkin(localStorage.getItem('skin') || 'retro');
 
 init();
