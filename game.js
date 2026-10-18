@@ -6,17 +6,64 @@ const BLOCK = 30;
 const MAX_RECORDS = 5;
 const RECORDS_KEY = 'tetris-records';
 
-const COLORS = [
-  null,
-  '#4dd0e1', // I - cyan
-  '#ffd54f', // O - yellow
-  '#ba68c8', // T - purple
-  '#81c784', // S - green
-  '#e57373', // Z - red
-  '#90caf9', // J - pale blue
-  '#ffb74d', // L - orange
-  '#b0bec5', // Tuerca - gris metálico
-];
+const SKINS = {
+  retro: {
+    colors: [null, '#4dd0e1', '#ffd54f', '#ba68c8', '#81c784', '#e57373', '#90caf9', '#ffb74d', '#b0bec5'],
+    gridColor: null,
+    drawBlock(ctx, x, y, color, size) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+    }
+  },
+  neon: {
+    colors: [null, '#00fff5', '#ffe600', '#cc44ff', '#00ff88', '#ff2255', '#4499ff', '#ff8800', '#aabbcc'],
+    gridColor: '#111',
+    drawBlock(ctx, x, y, color, size) {
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = color;
+      ctx.fillRect(x * size + 2, y * size + 2, size - 4, size - 4);
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x * size + 2.5, y * size + 2.5, size - 5, size - 5);
+    }
+  },
+  pastel: {
+    colors: [null, '#a8e6cf', '#ffd3b6', '#d4a5d8', '#b5ead7', '#ffb7b2', '#b5c8f0', '#ffdac1', '#d1d8e0'],
+    gridColor: null,
+    drawBlock(ctx, x, y, color, size) {
+      const bx = x * size + 2, by = y * size + 2, bw = size - 4, bh = size - 4, r = 5;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, r);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, 3, [r, r, 0, 0]);
+      ctx.fill();
+    }
+  },
+  pixel: {
+    colors: [null, '#00bcd4', '#ffcc00', '#9c27b0', '#4caf50', '#f44336', '#2196f3', '#ff9800', '#9e9e9e'],
+    gridColor: null,
+    drawBlock(ctx, x, y, color, size) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * size, y * size, size, size);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(x * size + size - 2, y * size, 2, size);
+      ctx.fillRect(x * size, y * size + size - 2, size, 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillRect(x * size, y * size, size - 2, 2);
+      ctx.fillRect(x * size, y * size, 2, size - 2);
+    }
+  }
+};
+
+let skinId = localStorage.getItem('skin') || 'retro';
+let skin = SKINS[skinId] || SKINS.retro;
 
 const PIECES = [
   null,
@@ -177,18 +224,14 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const color = skin.colors[colorIndex];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  skin.drawBlock(context, x, y, color, size);
   context.globalAlpha = 1;
 }
 
 function drawGrid() {
-  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid');
+  ctx.strokeStyle = skin.gridColor || getComputedStyle(document.documentElement).getPropertyValue('--grid');
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -442,6 +485,22 @@ resetRecordsBtn.addEventListener('click', () => {
     }, 2500);
   }
 });
+
+function applySkin(id) {
+  skinId = id;
+  skin = SKINS[id] || SKINS.retro;
+  localStorage.setItem('skin', id);
+  document.documentElement.dataset.skin = id;
+  document.querySelectorAll('.skin-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.skin === id);
+  });
+}
+
+document.querySelectorAll('.skin-btn').forEach(btn => {
+  btn.addEventListener('click', () => { applySkin(btn.dataset.skin); btn.blur(); });
+});
+
+applySkin(skinId);
 
 const themeBtn = document.getElementById('theme-toggle');
 
