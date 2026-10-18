@@ -227,3 +227,168 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Tabla de récords (bajo el juego) ---- */
+.records-section {
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.records-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-reset {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-reset:hover {
+  color: #e57373;
+  border-color: #e57373;
+}
+
+/* ---- Tabla compartida (overlay + sección) ---- */
+.records-wrap {
+  width: 100%;
+}
+
+.rec-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.rec-tbl th {
+  text-align: left;
+  color: var(--label);
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  padding: 0 6px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rec-tbl td {
+  padding: 5px 6px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.rec-tbl tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rec-tbl .rec-name {
+  color: var(--text);
+  font-weight: 500;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rec-tbl .rec-pts {
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.rec-tbl tr.rec-new td {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.rec-tbl tr.rec-new .rec-pts {
+  color: var(--accent);
+}
+
+.no-records {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ---- Nombre en game over ---- */
+.name-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.name-input-group.hidden {
+  display: none;
+}
+
+.new-record-label {
+  font-size: 11px;
+  color: #ffd54f;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.name-input-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+#player-name {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 130px;
+  outline: none;
+}
+
+#player-name:focus {
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+#save-record-btn {
+  background: var(--accent);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#save-record-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* game-over-content hidden state */
+#game-over-content.hidden {
+  display: none;
+}
+
+/* overlay records wrap — limit height inside overlay */
+#overlay-records {
+  max-height: 200px;
+  overflow-y: auto;
+  width: 320px;
+  margin-bottom: 4px;
+}
