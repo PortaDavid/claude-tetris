@@ -38,11 +38,14 @@ const scoreEl = document.getElementById('score');
 const linesEl = document.getElementById('lines');
 const levelEl = document.getElementById('level');
 const overlay = document.getElementById('overlay');
-const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
-const restartBtn = document.getElementById('restart-btn');
+const screenPause = document.getElementById('screen-pause');
+const screenControls = document.getElementById('screen-controls');
+const screenGameover = document.getElementById('screen-gameover');
+const startLevelVal = document.getElementById('start-level-val');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let startLevel = 1;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -108,7 +111,7 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
+    level = Math.floor(lines / 10) + startLevel;
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
   }
@@ -221,25 +224,30 @@ function drawNext() {
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
+function showScreen(name) {
+  screenPause.classList.toggle('hidden', name !== 'pause');
+  screenControls.classList.toggle('hidden', name !== 'controls');
+  screenGameover.classList.toggle('hidden', name !== 'gameover');
+  overlay.classList.remove('hidden');
+}
+
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
-  overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
-  overlay.classList.remove('hidden');
+  showScreen('gameover');
 }
 
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    overlay.classList.add('hidden');
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showScreen('pause');
   }
 }
 
@@ -264,10 +272,10 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = Math.max(100, 1000 - (startLevel - 1) * 90);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
@@ -279,7 +287,10 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (!gameOver) togglePause();
+    return;
+  }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -303,7 +314,18 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', init);
+document.getElementById('btn-resume').addEventListener('click', togglePause);
+document.getElementById('btn-restart').addEventListener('click', init);
+document.getElementById('btn-show-controls').addEventListener('click', () => showScreen('controls'));
+document.getElementById('btn-back').addEventListener('click', () => showScreen('pause'));
+document.getElementById('restart-btn').addEventListener('click', init);
+
+document.getElementById('level-dec').addEventListener('click', () => {
+  if (startLevel > 1) startLevelVal.textContent = --startLevel;
+});
+document.getElementById('level-inc').addEventListener('click', () => {
+  if (startLevel < 15) startLevelVal.textContent = ++startLevel;
+});
 
 const themeBtn = document.getElementById('theme-toggle');
 
@@ -315,7 +337,7 @@ function applyTheme(theme) {
 
 themeBtn.addEventListener('click', () => {
   applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
-  themeBtn.blur(); // evita que Space/teclas activen el botón durante el juego
+  themeBtn.blur();
 });
 
 applyTheme(document.documentElement.dataset.theme);

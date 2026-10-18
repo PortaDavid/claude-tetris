@@ -195,12 +195,17 @@ kbd {
   flex-direction: column;
   gap: 12px;
   align-items: center;
+  min-width: 210px;
 }
 
-#overlay-title {
+.overlay-title {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.gameover-title {
   color: #e57373;
 }
 
@@ -210,20 +215,107 @@ kbd {
   color: var(--accent);
 }
 
-#restart-btn {
-  margin-top: 8px;
-  background: var(--accent);
-  color: var(--btn-text);
-  border: none;
-  border-radius: 6px;
-  padding: 10px 28px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: background 0.15s;
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
-#restart-btn:hover {
+.menu-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+  text-align: left;
+}
+
+.menu-btn:hover {
+  border-color: var(--accent);
+  background: var(--kbd-bg);
+}
+
+.menu-btn.primary {
+  background: var(--accent);
+  color: var(--btn-text);
+  border-color: var(--accent);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.menu-btn.primary:hover {
   background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.menu-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--label);
+  font-weight: 600;
+}
+
+.level-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  width: 100%;
+}
+
+.level-stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.level-stepper span {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 32px;
+  text-align: center;
+}
+
+.step-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.15s;
+}
+
+.step-btn:hover {
+  border-color: var(--accent);
+}
+
+.menu-controls-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.menu-controls-list li {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
